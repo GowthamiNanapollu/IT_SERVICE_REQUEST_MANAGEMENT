@@ -6,7 +6,7 @@ A role-based web application built with Flask and MariaDB to manage IT support r
 
 The IT Service Request Management System provides a centralized platform for handling IT support requests within an organization. It separates responsibilities across employees, managers, and IT support staff to make request management more organized and efficient.
 
-The application uses Flask for backend logic, a MariaDB-compatible database for persistent storage, and a responsive web interface for interacting with service requests.
+The application uses Flask for backend logic, a MariaDB database for persistent storage, and a responsive web interface for interacting with service requests.
 
 ## Features
 
@@ -33,7 +33,7 @@ The application uses Flask for backend logic, a MariaDB-compatible database for 
 | Component | Technology |
 |---|---|
 | Backend | Python, Flask |
-| Database | MySQL-compatible database |
+| Database | MariaDB |
 | Database Driver | PyMySQL |
 | Frontend | HTML, CSS, JavaScript |
 | UI Framework | Bootstrap |
@@ -91,8 +91,8 @@ IT_SERVICE_REQUEST_MANAGEMENT/
 
 - Python installed on your system
 - Git
-- Access to a MySQL-compatible database
-- Database credentials and SSL connection details
+- Access to a MariaDB database
+- MariaDB connection credentials and SSL certificate details, if required by your database provider
 - Visual Studio Code or another Python editor
 
 ### 1. Clone the Repository
@@ -144,16 +144,21 @@ Replace the example values with your actual database configuration. The port sho
 
 ## Database Setup
 
+The application uses MariaDB for persistent storage and PyMySQL to establish database connections.
+
 The repository includes `schema.sql` and database setup utilities.
 
-1. Configure the database connection variables.
-2. Ensure the database is accessible and the SSL CA certificate is available.
-3. Create the required database and tables using the project's schema and setup process.
-4. Verify database connectivity before starting the application.
+Configure the database connection variables in your .env file.
 
-The database connection uses PyMySQL with SSL certificate verification through `certs/globalsignrootca.pem`.
+Ensure the MariaDB server is accessible using the configured host, port, username, and password.
 
-Take care when running database initialization scripts against an existing database, as their effects depend on their implementation.
+Ensure the required database and tables have been created using the project's schema and setup utilities.
+
+Verify the database connection before starting the application.
+
+For remote database connections, the application uses SSL certificate verification through certs/globalsignrootca.pem, as configured in the database connection code.
+
+Note: Review the database initialization scripts before running them against an existing database.
 
 ## Running the Application
 
