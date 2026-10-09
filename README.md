@@ -79,7 +79,7 @@ IT_SERVICE_REQUEST_MANAGEMENT/
 ![Employee Dashboard](screenshots/employee-dashboard.png)
 
 ### Manager Dashboard
-![Manager Dashboard](screenshots/IT-Manager-dashboard.png)
+![Manager Dashboard](screenshots/IT-Manager_dashboard.png)
 
 ### IT Staff Dashboard
 ![IT Staff Dashboard](screenshots/IT-staff-dashboard.png)
