@@ -11,7 +11,7 @@ The application uses Flask for backend logic, a MySQL-compatible database for pe
 ## Features
 
 - **Service Request Management** — Submit and manage IT support tickets.
-- **Role-Based Access Control** — Provide separate workflows for employees, managers, and IT staff.
+- **Role-Based Access Control** — Provide separate workflows for employees, IT managers, and IT staff.
 - **Ticket Assignment** — Assign and reassign requests to IT support personnel.
 - **Status Tracking** — Monitor request progress and resolution status.
 - **Request History** — Track ticket activity and changes.
@@ -25,7 +25,7 @@ The application uses Flask for backend logic, a MySQL-compatible database for pe
 | Role | Responsibilities |
 |---|---|
 | Employee | Submit support requests, view personal tickets, and track progress. |
-| Manager | View requests, assign or reassign tickets, and oversee service operations. |
+| IT Manager | View requests, assign or reassign tickets, and oversee service operations. |
 | IT Staff | View assigned requests, update statuses, and record resolution details. |
 
 ## Technology Stack
@@ -71,6 +71,19 @@ IT_SERVICE_REQUEST_MANAGEMENT/
 ├── .gitignore                # Git exclusions
 └── README.md                 # Project documentation
 ```
+
+
+## Application Screenshots
+
+### Employee Dashboard
+![Employee Dashboard](screenshots/employee-dashboard.png)
+
+### Manager Dashboard
+![Manager Dashboard](screenshots/IT-Manager-dashboard.png)
+
+### IT Staff Dashboard
+![IT Staff Dashboard](screenshots/IT-staff-dashboard.png)
+
 
 ## Getting Started
 
