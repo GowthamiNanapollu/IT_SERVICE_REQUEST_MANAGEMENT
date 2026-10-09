@@ -1,12 +1,12 @@
 # IT Service Request Management System
 
-A role-based web application built with Flask and MySQL to manage IT support requests, assign tickets to IT staff, and track request progress from submission to resolution.
+A role-based web application built with Flask and MariaDB to manage IT support requests, assign tickets to IT staff, and track request progress from submission to resolution.
 
 ## Overview
 
 The IT Service Request Management System provides a centralized platform for handling IT support requests within an organization. It separates responsibilities across employees, managers, and IT support staff to make request management more organized and efficient.
 
-The application uses Flask for backend logic, a MySQL-compatible database for persistent storage, and a responsive web interface for interacting with service requests.
+The application uses Flask for backend logic, a MariaDB-compatible database for persistent storage, and a responsive web interface for interacting with service requests.
 
 ## Features
 
