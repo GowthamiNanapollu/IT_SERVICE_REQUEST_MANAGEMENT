@@ -3,5 +3,8 @@ __pycache__/
 *.py[cod]
 .env
 .env.*
+*.pyc
 !.env.example
 *.log
+create_manager.py
+sqlprac.py

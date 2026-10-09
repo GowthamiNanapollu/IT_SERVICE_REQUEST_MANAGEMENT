@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Manager Dashboard | IT Service Desk</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand fw-semibold" href="/manager">IT Service Desk · Manager</a>
+        <div class="ms-auto d-flex align-items-center gap-3">
+            <span class="navbar-text">Manager workspace</span>
+            <a class="btn btn-outline-light btn-sm" href="/logout">Logout</a>
+        </div>
+    </div>
+</nav>
+<main>
+
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <p class="text-uppercase text-primary fw-semibold small mb-1">Management workspace</p>
+            <h1 class="h3 mb-1">Service Desk Overview</h1>
+            <p class="text-secondary mb-0">Assign requests to the IT team and monitor workload and SLAs.</p>
+        </div>
+        <button class="btn btn-outline-secondary" id="refreshBtn" type="button">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+    </div>
+
+    <div id="alertBox" class="alert d-none" role="alert"></div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-secondary small">Total requests</div>
+                <div class="display-6 fw-semibold" id="totalCount">—</div>
+                <div class="small text-secondary">All requests</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-secondary small">Open requests</div>
+                <div class="display-6 fw-semibold text-primary" id="openCount">—</div>
+                <div class="small text-secondary">Not resolved or closed</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-secondary small">Unassigned</div>
+                <div class="display-6 fw-semibold text-warning" id="unassignedCount">—</div>
+                <div class="small text-secondary">Needs manager assignment</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100"><div class="card-body">
+                <div class="text-secondary small">SLA overdue</div>
+                <div class="display-6 fw-semibold text-danger" id="overdueCount">—</div>
+                <div class="small text-secondary">Open and past due</div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                <h2 class="h5 mb-0">Request queue</h2>
+                <span class="small text-secondary" id="resultCount">Loading requests…</span>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-md-4">
+                    <label for="searchFilter" class="form-label small">Search</label>
+                    <input id="searchFilter" class="form-control" placeholder="Ticket ID, subject, requester">
+                </div>
+                <div class="col-md-2">
+                    <label for="priorityFilter" class="form-label small">Priority</label>
+                    <select id="priorityFilter" class="form-select">
+                        <option value="">All priorities</option>
+                        <option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="statusFilter" class="form-label small">Status</label>
+                    <select id="statusFilter" class="form-select">
+                        <option value="">All statuses</option>
+                        <option>New</option><option>Assigned</option><option>In Progress</option>
+                        <option>On Hold</option><option>Resolved</option><option>Closed</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="assigneeFilter" class="form-label small">Assignment</label>
+                    <select id="assigneeFilter" class="form-select">
+                        <option value="">Everyone</option>
+                        <option value="unassigned">Unassigned</option>
+                        <option value="assigned">Assigned</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-outline-secondary w-100" id="resetBtn" type="button">Reset filters</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Ticket</th><th>Request</th><th>Requester</th><th>Priority</th>
+                            <th>Status</th><th>Assigned to</th><th>SLA due</th><th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="requestRows">
+                        <tr><td colspan="8" class="text-center py-5 text-secondary">Loading requests…</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Requests by status</h2>
+                    <div id="statusSummary" class="d-grid gap-3"><span class="text-secondary">Loading…</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h2 class="h5 mb-3">Requests by priority</h2>
+                    <div id="prioritySummary" class="d-grid gap-3"><span class="text-secondary">Loading…</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form class="modal-content" id="assignForm">
+            <div class="modal-header">
+                <div>
+                    <h2 class="modal-title fs-5" id="assignModalLabel">Assign service request</h2>
+                    <div class="small text-secondary" id="assignSubtitle"></div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="assignRequestId">
+                <label for="staffSelect" class="form-label">Assign to IT staff member</label>
+                <select id="staffSelect" class="form-select" required>
+                    <option value="">Loading IT staff…</option>
+                </select>
+                <p class="small text-secondary mt-2 mb-0">Only available IT staff members are listed.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="saveAssignmentBtn">Save assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+</main>\n<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>\n</body>\n</html>
+
+
+<script>
+(() => {
+    const OPEN_STATUSES = new Set(["New", "Assigned", "In Progress", "On Hold"]);
+    const state = { requests: [], staff: [] };
+    const modalElement = document.getElementById("assignModal");
+    const assignModal = bootstrap.Modal.getOrCreateInstance(modalElement);
+
+    function showAlert(message, type = "danger") {
+        const box = document.getElementById("alertBox");
+        box.className = `alert alert-${type}`;
+        box.textContent = message;
+        box.classList.remove("d-none");
+    }
+    function clearAlert() {
+        const box = document.getElementById("alertBox");
+        box.classList.add("d-none");
+        box.textContent = "";
+    }
+    async function api(url, options = {}) {
+        const response = await fetch(url, {
+            credentials: "same-origin",
+            headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+            ...options
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(payload.error || payload.message || `Request failed (${response.status})`);
+        return payload;
+    }
+    function isOverdue(item) {
+        if (!item.sla_due_at || !OPEN_STATUSES.has(item.status)) return false;
+        const due = new Date(String(item.sla_due_at).replace(" ", "T"));
+        return !Number.isNaN(due.getTime()) && due < new Date();
+    }
+    function setCount(id, value) {
+        document.getElementById(id).textContent = value;
+    }
+    function renderSummary(containerId, key) {
+        const container = document.getElementById(containerId);
+        const counts = {};
+        for (const item of state.requests) {
+            const label = item[key] || "Unknown";
+            counts[label] = (counts[label] || 0) + 1;
+        }
+        const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        container.replaceChildren();
+        if (!entries.length) {
+            container.textContent = "No requests yet.";
+            return;
+        }
+        const max = Math.max(...entries.map(entry => entry[1]), 1);
+        for (const [label, count] of entries) {
+            const wrap = document.createElement("div");
+            const top = document.createElement("div");
+            top.className = "d-flex justify-content-between small mb-1";
+            const name = document.createElement("span");
+            name.textContent = label;
+            const number = document.createElement("strong");
+            number.textContent = count;
+            top.append(name, number);
+            const track = document.createElement("div");
+            track.className = "progress";
+            track.style.height = "7px";
+            const bar = document.createElement("div");
+            bar.className = "progress-bar";
+            bar.style.width = `${(count / max) * 100}%`;
+            bar.setAttribute("role", "progressbar");
+            bar.setAttribute("aria-valuenow", count);
+            bar.setAttribute("aria-valuemin", "0");
+            bar.setAttribute("aria-valuemax", max);
+            track.appendChild(bar);
+            wrap.append(top, track);
+            container.appendChild(wrap);
+        }
+    }
+    function badgeClass(priority) {
+        return ({Critical: "text-bg-danger", High: "text-bg-warning", Medium: "text-bg-info", Low: "text-bg-secondary"})[priority] || "text-bg-secondary";
+    }
+    function statusClass(status) {
+        return ({New: "text-bg-primary", Assigned: "text-bg-info", "In Progress": "text-bg-primary", "On Hold": "text-bg-warning", Resolved: "text-bg-success", Closed: "text-bg-secondary"})[status] || "text-bg-secondary";
+    }
+    function addTextCell(row, value) {
+        const cell = document.createElement("td");
+        cell.textContent = value == null || value === "" ? "—" : String(value);
+        row.appendChild(cell);
+        return cell;
+    }
+    function visibleRequests() {
+        const search = document.getElementById("searchFilter").value.trim().toLowerCase();
+        const priority = document.getElementById("priorityFilter").value;
+        const status = document.getElementById("statusFilter").value;
+        const assignment = document.getElementById("assigneeFilter").value;
+        return state.requests.filter(item => {
+            const text = [item.request_id, item.subject, item.requester, item.category, item.assigned_staff].join(" ").toLowerCase();
+            if (search && !text.includes(search)) return false;
+            if (priority && item.priority !== priority) return false;
+            if (status && item.status !== status) return false;
+            if (assignment === "unassigned" && item.assigned_to) return false;
+            if (assignment === "assigned" && !item.assigned_to) return false;
+            return true;
+        });
+    }
+    function renderRequests() {
+        const tbody = document.getElementById("requestRows");
+        tbody.replaceChildren();
+        const items = visibleRequests();
+        document.getElementById("resultCount").textContent = `${items.length} request${items.length === 1 ? "" : "s"}`;
+        if (!items.length) {
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 8;
+            cell.className = "text-center py-5 text-secondary";
+            cell.textContent = "No requests match these filters.";
+            row.appendChild(cell);
+            tbody.appendChild(row);
+            return;
+        }
+        for (const item of items) {
+            const row = document.createElement("tr");
+            addTextCell(row, `#${item.request_id}`);
+            const subjectCell = addTextCell(row, item.subject);
+            const strong = document.createElement("strong");
+            strong.textContent = item.subject || "Untitled request";
+            subjectCell.textContent = "";
+            subjectCell.appendChild(strong);
+            if (item.category) {
+                const small = document.createElement("div");
+                small.className = "small text-secondary";
+                small.textContent = item.category;
+                subjectCell.appendChild(small);
+            }
+            addTextCell(row, item.requester);
+            const priorityCell = document.createElement("td");
+            const priorityBadge = document.createElement("span");
+            priorityBadge.className = `badge ${badgeClass(item.priority)}`;
+            priorityBadge.textContent = item.priority || "Unknown";
+            priorityCell.appendChild(priorityBadge);
+            row.appendChild(priorityCell);
+            const statusCell = document.createElement("td");
+            const statusBadge = document.createElement("span");
+            statusBadge.className = `badge ${statusClass(item.status)}`;
+            statusBadge.textContent = item.status || "Unknown";
+            statusCell.appendChild(statusBadge);
+            row.appendChild(statusCell);
+            const assignedCell = addTextCell(row, item.assigned_staff || "Unassigned");
+            if (!item.assigned_to) assignedCell.classList.add("text-warning-emphasis", "fw-semibold");
+            const slaCell = addTextCell(row, item.sla_due_at || "Not available");
+            if (isOverdue(item)) {
+                slaCell.classList.add("text-danger", "fw-semibold");
+                slaCell.title = "SLA overdue";
+            }
+            const actionCell = document.createElement("td");
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "btn btn-sm btn-primary text-nowrap";
+            button.textContent = item.assigned_to ? "Reassign" : "Assign";
+            button.disabled = ["Resolved", "Closed"].includes(item.status);
+            button.addEventListener("click", () => openAssign(item));
+            actionCell.appendChild(button);
+            row.appendChild(actionCell);
+            tbody.appendChild(row);
+        }
+    }
+    async function loadStaff() {
+        state.staff = await api("/api/staff");
+        const select = document.getElementById("staffSelect");
+        select.replaceChildren();
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "Select an IT staff member";
+        select.appendChild(placeholder);
+        for (const staff of state.staff) {
+            const option = document.createElement("option");
+            option.value = staff.staff_id;
+            option.textContent = staff.name;
+            select.appendChild(option);
+        }
+    }
+    function openAssign(item) {
+        document.getElementById("assignRequestId").value = item.request_id;
+        document.getElementById("assignSubtitle").textContent = `Ticket #${item.request_id} · ${item.subject || ""}`;
+        document.getElementById("staffSelect").value = item.assigned_to ? String(item.assigned_to) : "";
+        assignModal.show();
+    }
+    async function loadRequests() {
+        clearAlert();
+        document.getElementById("requestRows").innerHTML = '<tr><td colspan="8" class="text-center py-5 text-secondary">Loading requests…</td></tr>';
+        try {
+            state.requests = await api("/api/requests");
+            const open = state.requests.filter(item => OPEN_STATUSES.has(item.status)).length;
+            const unassigned = state.requests.filter(item => !item.assigned_to && OPEN_STATUSES.has(item.status)).length;
+            const overdue = state.requests.filter(isOverdue).length;
+            setCount("totalCount", state.requests.length);
+            setCount("openCount", open);
+            setCount("unassignedCount", unassigned);
+            setCount("overdueCount", overdue);
+            renderRequests();
+            renderSummary("statusSummary", "status");
+            renderSummary("prioritySummary", "priority");
+        } catch (error) {
+            showAlert(error.message);
+            document.getElementById("requestRows").innerHTML = '<tr><td colspan="8" class="text-center py-5 text-danger">Could not load requests.</td></tr>';
+        }
+    }
+    document.getElementById("assignForm").addEventListener("submit", async event => {
+        event.preventDefault();
+        clearAlert();
+        const requestId = document.getElementById("assignRequestId").value;
+        const staffId = document.getElementById("staffSelect").value;
+        if (!staffId) {
+            showAlert("Select an IT staff member before saving.", "warning");
+            return;
+        }
+        const button = document.getElementById("saveAssignmentBtn");
+        button.disabled = true;
+        button.textContent = "Saving…";
+        try {
+            await api(`/api/requests/${requestId}/assign`, {
+                method: "PUT",
+                body: JSON.stringify({staff_id: Number(staffId)})
+            });
+            assignModal.hide();
+            showAlert(`Ticket #${requestId} assigned successfully.`, "success");
+            await loadRequests();
+        } catch (error) {
+            showAlert(error.message);
+        } finally {
+            button.disabled = false;
+            button.textContent = "Save assignment";
+        }
+    });
+    ["searchFilter", "priorityFilter", "statusFilter", "assigneeFilter"].forEach(id => {
+        document.getElementById(id).addEventListener(id === "searchFilter" ? "input" : "change", renderRequests);
+    });
+    document.getElementById("resetBtn").addEventListener("click", () => {
+        ["searchFilter", "priorityFilter", "statusFilter", "assigneeFilter"].forEach(id => document.getElementById(id).value = "");
+        renderRequests();
+    });
+    document.getElementById("refreshBtn").addEventListener("click", loadRequests);
+
+    (async function init() {
+        try {
+            await loadStaff();
+        } catch (error) {
+            showAlert(`Could not load IT staff list: ${error.message}`);
+        }
+        await loadRequests();
+    })();
+})();
+</script>
+</main>\n<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>\n</body>\n</html>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
